@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NETSCOUT Africa · Sales Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">NS</div>
+    <div>
+      <div class="logo-text">NETSCOUT</div>
+      <div class="logo-sub">Africa · Sales Intel</div>
+    </div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar" id="userInitials">?</div>
+    <div>
+      <div class="user-name" id="userNameDisplay">Sales Manager</div>
+      <div class="user-role" id="userRoleDisplay">North Africa</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Dashboard</div>
+    <div class="nav-item active" onclick="navigate('dashboard',this)">
+      <span class="nav-icon">📊</span> Overview
+    </div>
+    <div class="nav-item" onclick="navigate('strategy',this)">
+      <span class="nav-icon">✦</span> AI Strategy
+    </div>
+    <div class="nav-item" onclick="navigate('prospects',this)">
+      <span class="nav-icon">🎯</span> Prospect Intel
+    </div>
+    <div class="nav-item" onclick="navigate('stratlib',this)">
+      <span class="nav-icon">📚</span> Strategy Library
+      <span class="nav-badge" id="stratBadge" style="display:none;background:var(--purple)">0</span>
+    </div>
+    <div class="nav-item" onclick="navigate('actlog',this)">
+      <span class="nav-icon">📋</span> Activity Log
+    </div>
+
+    <div class="nav-item" onclick="navigate('actions',this)">
+      <span class="nav-icon">🔔</span> Daily Actions
+      <span class="nav-badge" id="actionsBadge" style="display:none">0</span>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:12px">Data</div>
+    <div class="nav-item" onclick="navigate('sfdc',this)">
+      <span class="nav-icon">☁</span> Salesforce Import
+      <span class="nav-badge" id="sfdcBadge" style="display:none;background:var(--accent3)">✓</span>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:12px">Configure</div>
+    <div class="nav-item" onclick="navigate('config-opportunities',this)">
+      <span class="nav-icon">💼</span> Opportunities
+    </div>
+    <div class="nav-item" onclick="navigate('config-regions',this)">
+      <span class="nav-icon">🌍</span> Regions & Targets
+    </div>
+    <div class="nav-item" onclick="navigate('config-profile',this)">
+      <span class="nav-icon">⚙</span> My Profile
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <span class="version-tag">v1.0</span>
+    <span>North Africa</span>
+  </div>
+</div>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-crumb" id="topbarCrumb">· Overview</div>
+    </div>
+    <div class="topbar-right">
+      <div class="live-dot-wrap"><div class="live-dot"></div> Live</div>
+      <div class="topbar-btn" id="topbarDate"></div>
+      <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()">🌙 Dark</button>
+      <button class="topbar-btn" onclick="navigate('config-opportunities', document.querySelector('.nav-item:nth-child(6)'))">⚙ Configure</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: DASHBOARD ══ -->
+  <div class="page anim" id="page-dashboard">
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="dash-grid">
+      <div class="panel" id="pipelinePanel">
+        <div class="panel-hd"><div class="panel-title">Pipeline by Domain</div><div class="panel-badge">$M</div></div>
+        <div class="bar-chart" id="domainBars"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Top Opportunities</div><div class="panel-badge">By Value</div></div>
+        <div class="opp-list" id="oppList"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">Regional View</div><div class="panel-badge">Pipeline</div></div>
+        <div class="region-grid" id="regionGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: ACTIVITY LOG ══ -->
+  <div class="page hidden" id="page-actlog">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px">Activity Log</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Select an opportunity to view its activity history and log new actions.</div>
+
+      <!-- STEP 1: OPPORTUNITY SELECTOR -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="cfg-label" style="margin-bottom:8px">Select Opportunity</div>
+        <select id="alOpp" class="cfg-select" style="font-size:12px;padding:11px 14px" onchange="onActLogOppSelect()">
+          <option value="">— Select an active opportunity —</option>
+        </select>
+      </div>
+
+      <!-- OPP CONTEXT + LOG + FORM — shown after selecting -->
+      <div id="alOppContext" style="display:none">
+
+        <!-- OPP SUMMARY STRIP -->
+        <div id="alOppStrip" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center"></div>
+
+        <!-- TIMELINE + ADD FORM side by side -->
+        <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start">
+
+          <!-- LEFT: Timeline -->
+          <div class="panel" style="padding:0;overflow:hidden">
+            <div class="panel-hd" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+              <div class="panel-title">Activity Timeline</div>
+              <select id="alFilterType" class="cfg-select" style="font-size:10px;padding:4px 10px" onchange="renderActivityLog()">
+                <option value="">All Types</option>
+                <option>📞 Call</option>
+                <option>📧 Email</option>
+                <option>🤝 Meeting</option>
+                <option>📄 Proposal Sent</option>
+                <option>🧪 POC / Demo</option>
+                <option>📋 MoM Sent</option>
+                <option>💬 WhatsApp</option>
+                <option>✈ On-site Visit</option>
+                <option>📑 Contract Sent</option>
+                <option>🔁 Follow-up</option>
+              </select>
+            </div>
+            <div id="activityTimeline" style="max-height:600px;overflow-y:auto;padding:0 20px"></div>
+          </div>
+
+          <!-- RIGHT: Add new log -->
+          <div class="panel" style="position:sticky;top:20px">
+            <div class="panel-hd"><div class="panel-title">➕ Log New Action</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="cfg-field">
+                <div class="cfg-label">Action Type</div>
+                <select id="alType" class="cfg-select">
+                  <option>📞 Call</option>
+                  <option>📧 Email</option>
+                  <option>🤝 Meeting</option>
+                  <option>📄 Proposal Sent</option>
+                  <option>🧪 POC / Demo</option>
+                  <option>📋 MoM Sent</option>
+                  <option>💬 WhatsApp</option>
+                  <option>✈ On-site Visit</option>
+                  <option>📑 Contract Sent</option>
+                  <option>🔁 Follow-up</option>
+                </select>
+              </div>
+              <div class="cfg-field">
+                <div class="cfg-label">Date</div>
+                <input id="alDate" type="text" class="cfg-input" placeholder="Pick a date" readonly style="cursor:pointer">
+              </div>
+              <div class="cfg-field">
+                <div class="cfg-label">Sentiment</div>
+                <select id="alSentiment" class="cfg-select">
+                  <option value="positive">😊 Positive</option>
+                  <option value="neutral">😐 Neutral</option>
+                  <option value="concerned">😟 Concerned</option>
+                  <option value="negative">🔴 At Risk</option>
+                </select>
+              </div>
+              <div class="cfg-field">
+                <div class="cfg-label">Attendees (Enter to add)</div>
+                <div class="attendees-wrap" id="alAttendeesWrap" onclick="document.getElementById('alAttendeeInput').focus()" style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;min-height:36px;cursor:text">
+                  <input id="alAttendeeInput" style="background:transparent;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;flex:1;min-width:80px" placeholder="Name / Role…">
+                </div>
+              </div>
+              <div class="cfg-field">
+                <div class="cfg-label">Note / Outcome</div>
+                <textarea id="alNote" class="cfg-input" rows="3" style="resize:vertical;line-height:1.5" placeholder="What happened? Key decisions, commitments…"></textarea>
+              </div>
+              <div class="cfg-field">
+                <div class="cfg-label">Next Action</div>
+                <input id="alNext" class="cfg-input" placeholder="e.g. Send proposal Friday">
+              </div>
+              <button onclick="logActivity()" style="background:linear-gradient(135deg,#0066ff,#00c8ff);color:#fff;border:none;border-radius:9px;padding:10px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,102,255,0.2)">➕ Log Action</button>
+              <span id="alSavedMsg" style="font-size:10px;color:var(--accent3);text-align:center"></span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══ PAGE: PROSPECT INTELLIGENCE ══ -->
+  <div class="page hidden" id="page-prospects">
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800">Prospect Intelligence</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">AI-powered new account suggestions based on your pipeline patterns and North Africa market context</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <button onclick="toggleProspectHistory()" id="historyToggleBtn"
+            style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:9px;padding:9px 16px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+            📂 Previous
+            <span id="historyCount" style="background:var(--purple);color:#fff;border-radius:10px;padding:1px 7px;font-size:9px;display:none">0</span>
+          </button>
+          <button id="prospectGenBtn" onclick="generateProspects()"
+            style="background:linear-gradient(135deg,#7b2fff,#ff6b35);color:#fff;border:none;border-radius:10px;padding:11px 24px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(123,47,255,0.3);white-space:nowrap">
+            🎯 Generate Prospects
+          </button>
+        </div>
+      </div>
+
+      <!-- HISTORY PANEL -->
+      <div id="prospectHistory" style="display:none;margin-top:12px">
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div class="panel-hd" style="padding:12px 18px">
+            <div class="panel-title">📂 Saved Sessions</div>
+            <button onclick="clearProspectHistory()"
+              style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:9px;cursor:pointer">
+              🗑 Clear All
+            </button>
+          </div>
+          <div id="prospectHistoryList" style="max-height:300px;overflow-y:auto"></div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="panel" style="margin:16px 0;padding:14px 20px">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <div class="cfg-field" style="flex:1;min-width:140px">
+            <div class="cfg-label">Region</div>
+            <select id="prospectRegion" class="cfg-select" style="font-size:11px">
+              <option value="">All Regions</option>
+            </select>
+          </div>
+          <div class="cfg-field" style="flex:1;min-width:140px">
+            <div class="cfg-label">Domain Focus</div>
+            <select id="prospectDomain" class="cfg-select" style="font-size:11px">
+              <option value="">All Domains</option>
+              <option>Service Assurance</option>
+              <option>Security</option>
+            </select>
+          </div>
+          <div class="cfg-field" style="flex:1;min-width:140px">
+            <div class="cfg-label">Industry</div>
+            <select id="prospectIndustry" class="cfg-select" style="font-size:11px">
+              <option value="">All Industries</option>
+              <option>Service Provider</option>
+              <option>Enterprise</option>
+              <option>Banking</option>
+              <option>Government</option>
+            </select>
+          </div>
+          <div class="cfg-field" style="flex:1;min-width:120px">
+            <div class="cfg-label">Count</div>
+            <select id="prospectCount" class="cfg-select" style="font-size:11px">
+              <option value="5" selected>5 prospects</option>
+              <option value="8">8 prospects</option>
+              <option value="10">10 prospects</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUTPUT -->
+      <div id="prospectOutput">
+        <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+          <div style="font-size:48px;opacity:0.15;margin-bottom:16px">🎯</div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px">Ready to find new prospects</div>
+          <div style="font-size:11px;max-width:400px;margin:0 auto;line-height:1.7">
+            Claude will analyse your existing pipeline, identify white-space opportunities, and suggest the best accounts to pursue across your North Africa territory.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ PAGE: AI STRATEGY ══ -->
+  <div class="page hidden" id="page-strategy">
+    <div style="max-width:860px">
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px">AI Strategy Generator</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Select an active opportunity — fields auto-fill from your pipeline.</div>
+
+      <div class="panel" style="margin-bottom:14px">
+        <div class="cfg-label" style="margin-bottom:8px">Select Opportunity</div>
+        <select id="aiOppSelect" class="cfg-select" style="font-size:12px;padding:11px 14px;margin-bottom:12px" onchange="onStrategyOppSelect()">
+          <option value="">— Select an active opportunity —</option>
+        </select>
+        <div id="aiOppSummary" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
+            <div><div class="cfg-label">Account</div><div id="aiSumAccount" style="font-size:11px;margin-top:4px"></div></div>
+            <div><div class="cfg-label">Domain</div><div id="aiSumDomain" style="font-size:11px;margin-top:4px"></div></div>
+            <div><div class="cfg-label">Stage</div><div id="aiSumStage" style="font-size:11px;margin-top:4px"></div></div>
+            <div><div class="cfg-label">Value</div><div id="aiSumValue" style="font-size:11px;margin-top:4px;color:var(--accent3);font-weight:600"></div></div>
+            <div><div class="cfg-label">Industry</div><div id="aiSumIndustry" style="font-size:11px;margin-top:4px"></div></div>
+            <div><div class="cfg-label">Region</div><div id="aiSumRegion" style="font-size:11px;margin-top:4px"></div></div>
+            <div><div class="cfg-label">Win %</div><div id="aiSumProb" style="font-size:11px;margin-top:4px"></div></div>
+            <div><div class="cfg-label">Product</div><div id="aiSumProduct" style="font-size:11px;margin-top:4px;color:#a07fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div></div>
+          </div>
+          <div id="aiSumLastAct" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:10px;color:var(--muted)"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:14px">
+        <div class="cfg-label" style="margin-bottom:10px">Additional Context (optional)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+          <div class="cfg-field">
+            <div class="cfg-label">Competitor (if known)</div>
+            <input id="aiCompetitor" class="cfg-input" placeholder="e.g. Spirent, Viavi, EXFO">
+          </div>
+          <div class="cfg-field">
+            <div class="cfg-label">Key Stakeholder</div>
+            <input id="aiStakeholder" class="cfg-input" placeholder="e.g. CTO, NOC Director">
+          </div>
+        </div>
+        <div class="cfg-field">
+          <div class="cfg-label">Notes from recent meetings</div>
+          <textarea id="aiContext" class="cfg-input" style="resize:vertical;min-height:80px;line-height:1.6" placeholder="Paste any relevant context — objections, budget status, decision timeline…"></textarea>
+        </div>
+      </div>
+
+      <input type="hidden" id="aiOpp">
+      <input type="hidden" id="aiAcct">
+      <input type="hidden" id="aiValue">
+      <input type="hidden" id="aiStage">
+      <input type="hidden" id="aiDomain">
+      <input type="hidden" id="aiRegion">
+
+      <button id="aiGenBtn" onclick="generateStrategy()" style="background:linear-gradient(135deg,#7b2fff,#00c8ff);color:#fff;border:none;border-radius:10px;padding:11px 26px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(123,47,255,0.3);letter-spacing:0.05em">✦ Generate Strategy</button>
+      <div id="aiOutput" style="margin-top:20px"></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: STRATEGY LIBRARY ══ -->
+  <div class="page hidden" id="page-stratlib">
+    <div style="max-width:1000px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800">Strategy Library</div>
+        <button onclick="clearAllStrategies()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">🗑 Clear All</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:24px">All generated strategies saved automatically — click any card to view in full.</div>
+      <div id="stratLibList"></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: DAILY ACTIONS ══ -->
+  <div class="page hidden" id="page-actions">
+    <div style="max-width:1100px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:3px">Daily Action Center</div>
+          <div style="font-size:11px;color:var(--muted)" id="actDateLabel2"></div>
+        </div>
+        <button id="genActBtn2" onclick="generateDailyActions()" style="background:linear-gradient(135deg,#ffc542,#ff6b35);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(255,197,66,0.25);transition:transform 0.15s">⚡ Generate Today's Actions</button>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;min-height:500px">
+        <div class="panel" style="padding:14px;overflow-y:auto;max-height:600px" id="actSidebar2">
+          <div style="text-align:center;padding:40px 16px;color:var(--muted);font-size:11px">
+            <div style="font-size:32px;opacity:0.2;margin-bottom:10px">⚡</div>
+            Click Generate to create your daily task list
+          </div>
+        </div>
+        <div class="panel" style="overflow-y:auto;max-height:600px" id="actDetail2">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;color:var(--muted);font-size:11px;text-align:center;gap:8px">
+            <div style="font-size:30px;opacity:0.2">👈</div>
+            Select an action to see details & templates
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: CONFIG OPPORTUNITIES ══ -->
+  <div class="page hidden" id="page-config-opportunities">
+    <div>
+      <div class="config-section-title">💼 Opportunities</div>
+      <div class="config-section-sub">Add, edit or remove opportunities from your pipeline. All dashboard data updates automatically.</div>
+
+      <div class="panel" style="margin-bottom:16px;padding:0;overflow:hidden">
+        <div class="panel-hd" style="padding:16px 20px">
+          <div class="panel-title">Pipeline Opportunities</div>
+          <button class="cfg-btn add" onclick="addOppRow()">＋ Add Opportunity</button>
+        </div>
+        <div style="overflow-x:auto;width:100%">
+        <table class="cfg-table" id="oppTable" style="min-width:1200px;width:100%">
+          <thead><tr>
+            <th style="min-width:40px">⭐</th>
+            <th style="min-width:160px">Opportunity Name</th>
+            <th style="min-width:130px">Account Name</th>
+            <th style="min-width:130px">Domain</th>
+            <th style="min-width:90px">Region</th>
+            <th style="min-width:90px">Value ($)</th>
+            <th style="min-width:130px">Stage</th>
+            <th style="min-width:85px">Close Date</th>
+            <th style="min-width:55px">Win %</th>
+            <th style="min-width:130px">Product</th>
+            <th style="min-width:110px">Industry</th>
+            <th style="min-width:110px">Partner</th>
+            <th style="min-width:100px">Revenue ($M)</th>
+            <th style="min-width:90px">Capex ($M)</th>
+            <th style="min-width:40px">Enrich</th>
+            <th style="min-width:40px"></th>
+          </tr></thead>
+          <tbody id="oppTableBody"></tbody>
+        </table>
+        </div><!-- /overflow wrapper -->
+      </div>
+
+      <div class="save-bar">
+        <button class="cfg-btn save" onclick="saveOpportunities()">💾 Save Changes</button>
+        <button class="cfg-btn" onclick="renderOppTable()">↺ Discard</button>
+        <div class="saved-toast" id="oppSavedToast">✓ Saved successfully</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: CONFIG REGIONS ══ -->
+  <div class="page hidden" id="page-config-regions">
+    <div style="max-width:900px">
+      <div class="config-section-title">🌍 Regions & Targets</div>
+      <div class="config-section-sub">Set annual targets per region, split by industry (Service Provider / Enterprise) and sub-domain (Service Assurance / Security).</div>
+
+      <div id="regionsConfigContainer"></div>
+
+      <div class="save-bar">
+        <button class="cfg-btn save" onclick="saveRegionsTargets()">💾 Save Changes</button>
+        <div class="saved-toast" id="regSavedToast">✓ Saved successfully</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: CONFIG PROFILE ══ -->
+  <div class="page hidden" id="page-config-profile">
+    <div style="max-width:640px">
+      <div class="config-section-title">⚙ My Profile & Preferences</div>
+      <div class="config-section-sub">Personalise your dashboard — name, role, and display preferences.</div>
+
+      <div class="cfg-card">
+        <div class="cfg-card-title">👤 Identity</div>
+        <div class="cfg-form-grid">
+          <div class="cfg-field"><div class="cfg-label">Your Name</div><input id="cfgName" class="cfg-input" placeholder="e.g. Ahmed Benali"></div>
+          <div class="cfg-field"><div class="cfg-label">Your Role</div><input id="cfgRole" class="cfg-input" placeholder="e.g. Sales Manager"></div>
+          <div class="cfg-field"><div class="cfg-label">Territory</div><input id="cfgTerritory" class="cfg-input" placeholder="e.g. North Africa"></div>
+          <div class="cfg-field"><div class="cfg-label">Company</div><input id="cfgCompany" class="cfg-input" value="NETSCOUT"></div>
+        </div>
+      </div>
+
+      <div class="cfg-card">
+        <div class="cfg-card-title">🎨 Dashboard Preferences</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:11px;margin-bottom:2px">Show win probability on opportunities</div><div style="font-size:9px;color:var(--muted)">Display % pills on the opportunity list</div></div>
+            <label class="toggle"><input type="checkbox" id="prefShowProb" checked><div class="toggle-slider"></div></label>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:11px;margin-bottom:2px">Show regional breakdown</div><div style="font-size:9px;color:var(--muted)">Display North Africa region cards</div></div>
+            <label class="toggle"><input type="checkbox" id="prefShowRegions" checked><div class="toggle-slider"></div></label>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:11px;margin-bottom:2px">Currency display</div><div style="font-size:9px;color:var(--muted)">All values shown in USD</div></div>
+            <select class="cfg-select" style="width:120px"><option>USD $</option><option>EUR €</option><option>MAD</option><option>EGP</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button class="cfg-btn save" onclick="saveProfile()">💾 Save Profile</button>
+        <div class="saved-toast" id="profileSavedToast">✓ Profile saved</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: SFDC IMPORT ══ -->
+  <div class="page hidden" id="page-sfdc">
+    <div style="max-width:960px">
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px">Salesforce Import</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Two files from Salesforce — drop both and the app joins them automatically by Opportunity Name.</div>
+
+      <!-- HOW TO GET THE FILES -->
+      <div class="panel" style="margin-bottom:16px;border-left:3px solid var(--accent4)">
+        <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:12px">📋 How to export both files from Salesforce</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:8px">FILE 1 — Opportunities</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:var(--accent4);flex-shrink:0;font-weight:700">1.</span>Go to <strong>Opportunities</strong> tab</div>
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:var(--accent4);flex-shrink:0;font-weight:700">2.</span>Select your list view (All Opportunities or North Africa)</div>
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:var(--accent4);flex-shrink:0;font-weight:700">3.</span>Click <strong>Printable View</strong> from the gear ⚙ menu</div>
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:var(--accent4);flex-shrink:0;font-weight:700">4.</span>Select all → Copy → Paste into Excel → Save as <strong>opportunities.csv</strong></div>
+            </div>
+            <div style="margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:9px;color:var(--muted)">
+              Columns needed: <span style="color:var(--text)">Account Name, Opportunity Name, <strong>Domain</strong>, <strong>Industry</strong>, Stage, Probability (%), Opportunity Status, Last Modified Date, Account Territory, Sales Potential</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#a07fff;margin-bottom:8px">FILE 2 — Products (optional but recommended)</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:#a07fff;flex-shrink:0;font-weight:700">1.</span>Open any <strong>Opportunity</strong> record</div>
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:#a07fff;flex-shrink:0;font-weight:700">2.</span>Scroll to the <strong>Products</strong> related list</div>
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:#a07fff;flex-shrink:0;font-weight:700">3.</span>You'll see: Opportunity Name, Product Description, Quantity, List Price, Sales Price, Discount, Total Price</div>
+              <div style="display:flex;gap:8px;font-size:10px;line-height:1.5"><span style="color:#a07fff;flex-shrink:0;font-weight:700">4.</span>Select all rows → Copy → Paste into Excel → Save as <strong>products.csv</strong></div>
+            </div>
+            <div style="margin-top:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:9px;color:var(--muted)">
+              The app joins on <span style="color:var(--text)">Opportunity Name</span> — multiple products per opp are comma-joined automatically
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TWO DROP ZONES -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+
+        <!-- Opportunities CSV -->
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="width:18px;height:18px;border-radius:50%;background:rgba(0,200,255,0.15);border:1px solid rgba(0,200,255,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">1</span>
+            Opportunities CSV
+            <span id="oppFileStatus" style="margin-left:auto;font-size:9px;color:var(--muted)">not loaded</span>
+          </div>
+          <div id="dropZoneOpp"
+            style="border:2px dashed var(--border2);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface)"
+            ondragover="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='rgba(0,200,255,0.04)'"
+            ondragleave="this.style.borderColor='var(--border2)';this.style.background='var(--surface)'"
+            ondrop="handleDropOpp(event)"
+            onclick="document.getElementById('csvFileOpp').click()">
+            <div style="font-size:28px;margin-bottom:8px;opacity:0.3">📋</div>
+            <div style="font-size:12px;font-weight:600;margin-bottom:4px">Drop opportunities.csv</div>
+            <div style="font-size:10px;color:var(--muted)">Account Name · Opportunity Name · Stage · Territory · Sales Potential</div>
+            <input type="file" id="csvFileOpp" accept=".csv" style="display:none" onchange="handleFileOpp(this)">
+          </div>
+        </div>
+
+        <!-- Products CSV -->
+        <div>
+          <div style="font-size:10px;font-weight:600;color:#a07fff;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="width:18px;height:18px;border-radius:50%;background:rgba(123,47,255,0.15);border:1px solid rgba(123,47,255,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">2</span>
+            Products CSV <span style="font-weight:400;color:var(--muted)">(optional)</span>
+            <span id="prodFileStatus" style="margin-left:auto;font-size:9px;color:var(--muted)">not loaded</span>
+          </div>
+          <div id="dropZoneProd"
+            style="border:2px dashed var(--border2);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface)"
+            ondragover="event.preventDefault();this.style.borderColor='#a07fff';this.style.background='rgba(123,47,255,0.04)'"
+            ondragleave="this.style.borderColor='var(--border2)';this.style.background='var(--surface)'"
+            ondrop="handleDropProd(event)"
+            onclick="document.getElementById('csvFileProd').click()">
+            <div style="font-size:28px;margin-bottom:8px;opacity:0.3">🧩</div>
+            <div style="font-size:12px;font-weight:600;margin-bottom:4px">Drop products.csv</div>
+            <div style="font-size:10px;color:var(--muted)">Opportunity Name · Product Description · Sales Price · Total Price</div>
+            <input type="file" id="csvFileProd" accept=".csv" style="display:none" onchange="handleFileProd(this)">
+          </div>
+        </div>
+      </div>
+
+      <!-- IMPORT BUTTON -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <button onclick="runImport()" id="importRunBtn"
+          style="background:linear-gradient(135deg,var(--accent),#0066ff);color:#000;border:none;border-radius:10px;padding:11px 28px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;cursor:pointer;letter-spacing:0.04em;box-shadow:0 4px 16px rgba(0,200,255,0.25);transition:transform 0.15s">
+          ⚡ Join & Import
+        </button>
+        <div style="font-size:10px;color:var(--muted)">Joins both files on Opportunity Name · updates dashboard instantly</div>
+      </div>
+
+      <!-- FIELD MAPPING (collapsible) -->
+      <details style="margin-bottom:16px">
+        <summary style="font-size:10px;color:var(--muted);cursor:pointer;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);list-style:none;display:flex;align-items:center;gap:8px">
+          <span>▶</span> <span>⚙ Advanced: Field Mapping</span>
+          <span style="margin-left:auto;font-size:9px">Expand to manually remap columns</span>
+        </summary>
+        <div style="padding:14px 0">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="fieldMappingGrid"></div>
+        </div>
+      </details>
+
+      <!-- LAST SYNC INFO -->
+      <div id="lastSyncBar" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin-bottom:16px;align-items:center;gap:12px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--accent3);flex-shrink:0"></div>
+        <div style="font-size:11px;flex:1" id="lastSyncText">Last synced: never</div>
+        <button onclick="clearImport()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:9px;cursor:pointer">✕ Clear</button>
+      </div>
+
+      <!-- PREVIEW TABLE -->
+      <div id="importPreview" style="display:none">
+        <div class="panel">
+          <div class="panel-hd">
+            <div class="panel-title" id="previewTitle">Preview</div>
+            <div style="display:flex;gap:8px">
+              <button onclick="confirmImport()" style="background:var(--accent3);color:#000;border:none;border-radius:8px;padding:7px 18px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer">✓ Confirm Import</button>
+              <button onclick="document.getElementById('importPreview').style.display='none'" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:7px 14px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer">Cancel</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:10px" id="previewTable"></table></div>
+        </div>
+      </div>
+
+      <!-- DAILY REMINDER -->
+      <div class="panel" style="margin-top:16px;border-left:3px solid var(--accent4)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:11px;font-weight:600;margin-bottom:4px">⏰ Daily Routine</div>
+            <div style="font-size:10px;color:var(--muted);line-height:1.6">
+              Morning: Printable View → Copy → Excel → Save as opportunities.csv<br>
+              Then: Open one opportunity → Products list → Copy → Save as products.csv<br>
+              Drop both here → ⚡ Join & Import → done in under 2 minutes
+            </div>
+          </div>
+          <div style="text-align:center;flex-shrink:0;margin-left:20px">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Last import</div>
+            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--accent4)" id="lastImportDisplay">Never</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /main -->
+  <script src="app.js"></script>
+</body>
+</html>
