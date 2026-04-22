@@ -17,19 +17,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install PyInstaller
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyinstaller
+        run: python -m pip install --upgrade pip && pip install pyinstaller
 
       - name: Build app
-        shell: cmd
-        run: |
-          pyinstaller --noconfirm --onedir --name SalesDashboard ^
-            --add-data "index.html;." ^
-            --add-data "*.js;." ^
-            --add-data "*.css;." ^
-            --add-data "*.ico;." ^
-            server.py
+        run: pyinstaller --noconfirm --onedir --name SalesDashboard --add-data "index.html;." server.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
