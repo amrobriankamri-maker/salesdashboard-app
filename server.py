@@ -28,11 +28,21 @@ MIME = {
 
 # 🔥 Important for PyInstaller
 def resource_path(relative_path: str) -> Path:
+    base = None
+
     if hasattr(sys, "_MEIPASS"):
-        return Path(sys._MEIPASS) / relative_path
-    return Path(__file__).resolve().parent / relative_path
+        base = Path(sys._MEIPASS)
+    else:
+        base = Path(__file__).resolve().parent
 
+    # First try normal location
+    p = base / relative_path
+    if p.exists():
+        return p
 
+    # 🔥 Fallback for PyInstaller _internal folder
+    p2 = base / "_internal" / relative_path
+    return p2
 class Handler(http.server.BaseHTTPRequestHandler):
 
     def log_message(self, fmt, *args):
