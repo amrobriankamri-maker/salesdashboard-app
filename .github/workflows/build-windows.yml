@@ -25,7 +25,8 @@ jobs:
           pyinstaller --noconfirm --onedir --name SalesDashboard ^
             --add-data "index.html;." ^
             --add-data "*.js;." ^
-            server.py
+            --add-data "*.css:." ^     
+       server.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
