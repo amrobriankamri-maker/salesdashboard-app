@@ -105,17 +105,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self._raw(status, data)
 
     def do_GET(self):
-    	path = self.path.split('?')[0]
+	path = self.path.split('?')[0]
     	if path == '/':
-        	path = '/index.html'
+       		path = '/index.html'
 
     	fp = resource_path(path.lstrip('/'))
     	print(f"GET {path} -> {fp} | exists={fp.is_file()}")
 
-   	 if not fp.is_file():
+    	if not fp.is_file():
         	self.send_response(404)
         	self.end_headers()
-       		self.wfile.write(b'Not found')
+        	self.wfile.write(b'Not found')
         	return
 
     	ext = fp.suffix.lower()
@@ -126,6 +126,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
     	self.send_cors()
     	self.end_headers()
     	self.wfile.write(data)
+
+
     def _json(self, status, obj):
         body = json.dumps(obj).encode()
         self.send_response(status)
