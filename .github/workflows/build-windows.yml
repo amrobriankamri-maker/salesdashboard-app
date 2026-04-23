@@ -23,10 +23,10 @@ jobs:
         shell: cmd
         run: |
           pyinstaller --noconfirm --onedir --name SalesDashboard ^
-            --add-data "index.html;." ^
-            --add-data "*.js;." ^
-            --add-data "*.css;." ^
-            server.py
+          --add-data "index.html;." ^
+          --add-data "*.js;." ^
+          --add-data "*.css;." ^
+          server.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
